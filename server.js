@@ -1,16 +1,24 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path');
+const bodyParser = require('body-parser');
+const passport = require('passport');
 require('dotenv').config();
+
+const admin = require('./routes/admin');
+
 const app = express();
+
+app.use(
+  bodyParser.urlencoded({
+    extended: false,
+  })
+);
+
+app.use(bodyParser.json());
 
 app.use(express.json());
 app.use(cors());
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => console.log(`Server connected on PORT ${PORT}`));
 
 mongoose.connect(
   process.env.MONGOOSE_CONNECTION_URI,
@@ -23,11 +31,11 @@ mongoose.connect(
   }
 );
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-  });
-}
+app.use(passport.initialize());
+require('./config/passport')(passport);
 
-app.use('/superadmins', require('./routes/superadmins'));
+app.use('/api/admin', admin);
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => console.log(`Server connected on PORT ${PORT}`));
