@@ -31,7 +31,7 @@ const upl = (req, res) => {
   const email = req.body.email;
   const text = req.body.text;
   const file_data = req.file.filename;
-
+  const rti_id=req.body.college+'/'+req.body.name.split(' ')[0]+'/'+uuidv4().split('-')[0];
   const newRtiData = {
     college,
     name,
@@ -44,6 +44,7 @@ const upl = (req, res) => {
     email,
     text,
     file_data,
+    rti_id,
   };
 
   const newRti = new Rti(newRtiData);
