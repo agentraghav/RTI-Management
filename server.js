@@ -4,9 +4,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 require('dotenv').config();
-
 const admin = require('./routes/admin');
-
+const rti = require('./routes/rti');
 const app = express();
 
 app.use(
@@ -35,6 +34,7 @@ app.use(passport.initialize());
 require('./config/passport')(passport);
 
 app.use('/api/admin', admin);
+app.use('/user', rti);
 
 const PORT = process.env.PORT || 5000;
 
