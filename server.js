@@ -6,6 +6,7 @@ const passport = require('passport');
 require('dotenv').config();
 const admin = require('./routes/admin');
 const rti = require('./routes/rti');
+const user = require('./routes/user');
 const app = express();
 
 app.use(
@@ -35,6 +36,7 @@ require('./config/passport')(passport);
 
 app.use('/api/admin', admin);
 app.use('/user', rti);
+app.use('/inquiry', user);
 
 const PORT = process.env.PORT || 5000;
 

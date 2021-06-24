@@ -206,4 +206,13 @@ router.post('/reject/:admin_id/:rti_id', upload.single('doc'), (req, res) => {
   }
 });
 
+router.get('/info/:rti_id', async (req, res) => {
+  try {
+    const query = await Rti.findOne({ rti_id: req.params.rti_id });
+    return res.json(query);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;
