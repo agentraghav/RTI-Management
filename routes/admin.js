@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const validateRegisterInput = require('../validation/register');
 const validateLoginInput = require('../validation/login');
 const Admin = require('../models/Admin');
+const Rti = require('../models/Rti');
 
 router.post('/register', (req, res) => {
   // Form validation
@@ -85,5 +86,36 @@ router.post('/login', (req, res) => {
     });
   });
 });
+
+router.get('/pending/:college', async (req,res)=>{
+  try {
+    const rti = await Rti.find({ college: req.params.college });
+    if (rti.length === 0) {
+      return res.status(400).json({ message: 'No Pending RTI' });
+    }
+    const pending = rti.filter(function(user){
+      return user.status === 0;
+    })
+    return res.json(pending);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+})
+
+router.get('/answered/:college', async (req,res)=>{
+  try {
+    const rti = await Rti.find({ college: req.params.college });
+    if (rti.length === 0) {
+      return res.status(400).json({ message: 'No Pending RTI' });
+    }
+    const pending = rti.filter(function(user){
+      return user.status !== 0;
+    })
+    return res.json(pending);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+})
+
 
 module.exports = router;
