@@ -2,11 +2,29 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
+let path = require('path');
 
 const validateRegisterInput = require('../validation/register');
 const validateLoginInput = require('../validation/login');
 const Admin = require('../models/Admin');
 const Rti = require('../models/Rti');
+const Answer = require('../models/Answer');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public');
+  },
+  filename: function (req, file, cb) {
+    cb(null, uuidv4() + '-' + Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1000000 },
+});
 
 router.post('/register', (req, res) => {
   // Form validation
@@ -87,35 +105,105 @@ router.post('/login', (req, res) => {
   });
 });
 
-router.get('/pending/:college', async (req,res)=>{
+router.get('/pending/:college', async (req, res) => {
   try {
     const rti = await Rti.find({ college: req.params.college });
     if (rti.length === 0) {
       return res.status(400).json({ message: 'No Pending RTI' });
     }
-    const pending = rti.filter(function(user){
+    const pending = rti.filter(function (user) {
       return user.status === 0;
-    })
+    });
     return res.json(pending);
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }
-})
+});
 
-router.get('/answered/:college', async (req,res)=>{
+router.get('/answered/:college', async (req, res) => {
   try {
     const rti = await Rti.find({ college: req.params.college });
     if (rti.length === 0) {
       return res.status(400).json({ message: 'No Pending RTI' });
     }
-    const pending = rti.filter(function(user){
+    const pending = rti.filter(function (user) {
       return user.status !== 0;
-    })
+    });
     return res.json(pending);
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }
-})
+});
 
+router.post('/answer/:admin_id/:rti_id', upload.single('doc'), (req, res) => {
+  try {
+    var doc;
+    const answer = req.body.answer;
+    if (req.file === undefined) {
+      doc = '';
+    } else {
+      doc = req.file.filename;
+    }
+    const admin_id = req.params.admin_id;
+    const rti_id = req.params.rti_id;
+    const newAnswer = new Answer({
+      answer,
+      doc,
+      admin_id,
+      rti_id,
+    });
+    newAnswer
+      .save()
+      .then(() => {
+        Rti.findByIdAndUpdate(rti_id, { status: 1 }, function (err, docs) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log('Updated User : ', docs);
+          }
+        });
+        res.json('RTI Answered');
+      })
+      .catch((err) => res.status(400).json('Error: ' + err));
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
+
+router.post('/reject/:admin_id/:rti_id', upload.single('doc'), (req, res) => {
+  try {
+    var doc;
+    const answer = req.body.answer;
+    if (req.file === undefined) {
+      doc = '';
+    } else {
+      doc = req.file.filename;
+    }
+
+    const admin_id = req.params.admin_id;
+    const rti_id = req.params.rti_id;
+    const newAnswer = new Answer({
+      answer,
+      doc,
+      admin_id,
+      rti_id,
+    });
+    newAnswer
+      .save()
+      .then(() => {
+        Rti.findByIdAndUpdate(rti_id, { status: 2 }, function (err, docs) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log('Updated User : ', docs);
+          }
+        });
+        res.json('RTI Answered');
+      })
+      .catch((err) => res.status(400).json('Error: ' + err));
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
 
 module.exports = router;

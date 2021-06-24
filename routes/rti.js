@@ -20,6 +20,12 @@ const upload = multer({
 });
 
 const upl = (req, res) => {
+  var file_data;
+  if (req.file === undefined) {
+    file_data = '';
+  } else {
+    file_data = req.file.filename;
+  }
   const college = req.body.college;
   const name = req.body.name;
   const gender = req.body.gender;
@@ -30,8 +36,12 @@ const upl = (req, res) => {
   const phone = req.body.phone;
   const email = req.body.email;
   const text = req.body.text;
-  const file_data = req.file.filename;
-  const rti_id=req.body.college+'/'+req.body.name.split(' ')[0]+'/'+uuidv4().split('-')[0];
+  const rti_id =
+    req.body.college +
+    '-' +
+    req.body.name.split(' ')[0] +
+    '-' +
+    uuidv4().split('-')[0];
   const newRtiData = {
     college,
     name,

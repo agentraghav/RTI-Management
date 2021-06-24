@@ -23,6 +23,9 @@ const AdminSchema = new Schema({
     type: Number,
     required: true,
   },
+  admin_id: {
+    type: String,
+  },
 });
 
 module.exports = mongoose.model('Admin', AdminSchema);

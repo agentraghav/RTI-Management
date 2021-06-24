@@ -53,11 +53,12 @@ const RtiSchema = new Schema({
   },
   file_data: {
     type: String,
+    default: '',
   },
-  rti_id:{
-    type:String,
-    default:'',
-  }
+  rti_id: {
+    type: String,
+    default: '',
+  },
 });
 
 module.exports = mongoose.model('Rti', RtiSchema);
